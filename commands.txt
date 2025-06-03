@@ -1,0 +1,3 @@
+ligar docker mosquitto
+uvicorn fastApi:app --reload - ligar fastapi
+python3 mqttpublisher.py - testing
