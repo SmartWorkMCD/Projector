@@ -9,4 +9,4 @@ COPY . .
 
 EXPOSE 8000
 
-CMD ["python3","app/main.py"]
+CMD ["uvicorn","fastApi:app"]
