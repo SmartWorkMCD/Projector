@@ -20,6 +20,10 @@ services:
         touch /mosquitto/config/passwd && \
         mosquitto_passwd -b /mosquitto/config/passwd \"$BROKER_USER\" \"$BROKER_PASSWORD\"; \
       fi && \
+      if [ ! -f /mosquitto/config/mosquitto.conf ]; then \
+        echo \"listener 1883\" > /mosquitto/config/mosquitto.conf && \
+        echo \"password_file /mosquitto/config/passwd\" >> /mosquitto/config/mosquitto.conf; \
+      fi && \
       mosquitto -c /mosquitto/config/mosquitto.conf"
     ]
     networks:

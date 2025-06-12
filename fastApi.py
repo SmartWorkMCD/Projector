@@ -1,4 +1,5 @@
 import json
+import time
 import dotenv
 from fastapi import FastAPI, WebSocket
 from fastapi.responses import HTMLResponse
@@ -12,9 +13,11 @@ app = FastAPI()
 latest_state = {}
 
 # mqtt setup
-MQTT_BROKER = os.getenv("MQTT_BROKER", "localhost")
-MQTT_PORT = int(os.getenv("MQTT_PORT", 1883))
-MQTT_TOPIC = os.getenv("MQTT_TOPIC", "test")
+MQTT_BROKER = os.getenv("BROKER_IP", "localhost")
+MQTT_PORT = int(os.getenv("BROKER_PORT", 1883))
+MQTT_USER = os.getenv("BROKER_USER", "")
+MQTT_PASSWORD = os.getenv("BROKER_PASSWORD", "")
+MQTT_TOPIC = os.getenv("BROKER_TOPIC", "test")
 
 # store connected websocket clients
 websocket_clients = set()
@@ -37,6 +40,8 @@ def mqtt_loop():
     client = mqtt.Client()
     client.on_connect = on_connect
     client.on_message = on_message
+    if MQTT_USER and MQTT_PASSWORD:
+        client.username_pw_set(MQTT_USER, MQTT_PASSWORD)
     client.connect(MQTT_BROKER, MQTT_PORT, 60)
     client.loop_forever()
 
