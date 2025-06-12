@@ -1,17 +1,20 @@
 import json
+import dotenv
 from fastapi import FastAPI, WebSocket
 from fastapi.responses import HTMLResponse
 import asyncio
 import threading
 import paho.mqtt.client as mqtt
+import os
+dotenv.load_dotenv()
 
 app = FastAPI()
 latest_state = {}
 
 # mqtt setup
-MQTT_BROKER = "localhost"
-MQTT_PORT = 1883
-MQTT_TOPIC = "test"
+MQTT_BROKER = os.getenv("MQTT_BROKER", "localhost")
+MQTT_PORT = int(os.getenv("MQTT_PORT", 1883))
+MQTT_TOPIC = os.getenv("MQTT_TOPIC", "test")
 
 # store connected websocket clients
 websocket_clients = set()
