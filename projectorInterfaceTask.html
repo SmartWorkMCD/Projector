@@ -1,15 +1,18 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <meta charset="UTF-8" />
   <title>Projector Grid Interface</title>
   <style>
-    html, body {
+    html,
+    body {
       margin: 0;
       padding: 0;
       overflow: hidden;
       background: transparent;
     }
+
     canvas {
       width: 100vw;
       height: 100vh;
@@ -17,390 +20,397 @@
     }
   </style>
 </head>
+
 <body>
-<canvas id="gridCanvas"></canvas>
+  <canvas id="gridCanvas"></canvas>
 
-<script>
-const canvas = document.getElementById('gridCanvas');
-const ctx = canvas.getContext('2d');
+  <script>
+    const canvas = document.getElementById('gridCanvas');
+    const ctx = canvas.getContext('2d');
 
-const cols = 5, rows = 5;
-let cellWidth, cellHeight;
+    const cols = 5, rows = 5;
+    let cellWidth, cellHeight;
 
-// const gridState = [
-//   { row: 0, col: 1, color: 'rgba(255,0,0,0.4)' },
-//   { row: 2, col: 3, color: 'rgba(0,255,0,0.4)' },
-//   { row: 4, col: 4, color: 'rgba(0,0,255,0.3)' }
-// ];
+    // const gridState = [
+    //   { row: 0, col: 1, color: 'rgba(255,0,0,0.4)' },
+    //   { row: 2, col: 3, color: 'rgba(0,255,0,0.4)' },
+    //   { row: 4, col: 4, color: 'rgba(0,0,255,0.3)' }
+    // ];
 
-// const simulatedResponse = {
-//   task: "Montar caixa - Produto 1",
-//   subtask: "Produto 1: 4 azuis, 2 amarelos e 3 verdes",
-//   cells: [
-//     { row: 0, col: 1, color: 'rgba(255,0,0,0.4)', action: 'highlight' },
-//     { row: 2, col: 3, color: 'rgba(0,255,0,0.4)', action: 'highlight' },
-//     { row: 4, col: 4, color: 'rgba(0,0,255,0.3)', action: 'highlight' }
-//   ]
-// };
+    // const simulatedResponse = {
+    //   task: "Montar caixa - Produto 1",
+    //   subtask: "Produto 1: 4 azuis, 2 amarelos e 3 verdes",
+    //   cells: [
+    //     { row: 0, col: 1, color: 'rgba(255,0,0,0.4)', action: 'highlight' },
+    //     { row: 2, col: 3, color: 'rgba(0,255,0,0.4)', action: 'highlight' },
+    //     { row: 4, col: 4, color: 'rgba(0,0,255,0.3)', action: 'highlight' }
+    //   ]
+    // };
 
-let headerHeight = 0;
-let taskText = "";
-let subtaskText = "";
-let progress = 0; // initial progress between 0 and 1
+    let headerHeight = 0;
+    let taskText = "";
+    let subtaskText = "";
+    let progress = 0; // initial progress between 0 and 1
 
-let currentGridState = {
-  cells: [],
-  task: "",
-  subtask: ""
-};
+    let currentGridState = {
+      cells: [],
+      task: "",
+      subtask: ""
+    };
 
-// let taskText = simulatedResponse.task;
-// let subtaskText = simulatedResponse.subtask;
+    // let taskText = simulatedResponse.task;
+    // let subtaskText = simulatedResponse.subtask;
 
-const img = new Image();
-img.src = 'images/completed.png';
+    const img = new Image();
+    img.src = 'images/completed.png';
 
-img.onload = () => resizeCanvas();
+    img.onload = () => resizeCanvas();
 
-function resizeCanvas() {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
 
-  headerHeight = canvas.height * 0.1; // 10% reserved at the top
+      headerHeight = canvas.height * 0.1; // 10% reserved at the top
 
-  const gridHeight = canvas.height - headerHeight;
-  cellWidth = canvas.width / cols;
-  cellHeight = gridHeight / rows;
+      const gridHeight = canvas.height - headerHeight;
+      cellWidth = canvas.width / cols;
+      cellHeight = gridHeight / rows;
 
-  draw();
-}
+      draw();
+    }
 
-function draw() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  drawHeader();
-  drawGrid();
-  applyGridState();
-  drawProgressDonut();
-}
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawHeader();
+      drawGrid();
+      applyGridState();
+      drawProgressDonut();
+    }
 
-function drawHeader() {
-  ctx.fillStyle = 'rgba(245, 245, 220, 0.5)';
-  // ctx.fillStyle = '#222';
-  ctx.fillRect(0, 0, canvas.width, headerHeight);
+    function drawHeader() {
+      ctx.fillStyle = 'rgba(245, 245, 220, 0.5)';
+      // ctx.fillStyle = '#222';
+      ctx.fillRect(0, 0, canvas.width, headerHeight);
 
-  // brown line under header
-  ctx.strokeStyle = 'rgba(150, 100, 50, 0.8)';
-  ctx.lineWidth = 3;
-  ctx.beginPath();
-  ctx.moveTo(0, headerHeight);
-  ctx.lineTo(canvas.width, headerHeight);
-  ctx.stroke();
+      // brown line under header
+      ctx.strokeStyle = 'rgba(150, 100, 50, 0.8)';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(0, headerHeight);
+      ctx.lineTo(canvas.width, headerHeight);
+      ctx.stroke();
 
-  ctx.textAlign = 'center';
-  const centerX = canvas.width / 2;
+      ctx.textAlign = 'center';
+      const centerX = canvas.width / 2;
 
-  // subtask
-  ctx.font = 'bold 30px sans-serif';
-  // ctx.fillStyle = '#222';
-  ctx.fillStyle = 'rgba(165, 105, 50, 1)';
-  ctx.textBaseline = 'top';
-  ctx.fillText(`${subtaskText}`, centerX, 20);
+      // subtask
+      ctx.font = 'bold 30px sans-serif';
+      // ctx.fillStyle = '#222';
+      ctx.fillStyle = 'rgba(165, 105, 50, 1)';
+      ctx.textBaseline = 'top';
+      ctx.fillText(`${subtaskText}`, centerX, 20);
 
-  // task - small, more general
-  ctx.font = '21px sans-serif';
-  ctx.fillStyle = 'rgba(150, 100, 50, 0.7)';
-  // ctx.fillStyle = '#222';
-  ctx.fillText(`Task: ${taskText}`, centerX, 65);
-}
+      // task - small, more general
+      ctx.font = '21px sans-serif';
+      ctx.fillStyle = 'rgba(150, 100, 50, 0.7)';
+      // ctx.fillStyle = '#222';
+      ctx.fillText(`Task: ${taskText}`, centerX, 65);
+    }
 
-function drawGrid() {
-  ctx.strokeStyle = 'rgba(0, 0, 0, 0.5)';
-  ctx.lineWidth = 1;
+    function drawGrid() {
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.5)';
+      ctx.lineWidth = 1;
 
-  ctx.font = '10px sans-serif';
-  ctx.fillStyle = '#222';
+      ctx.font = '10px sans-serif';
+      ctx.fillStyle = '#222';
 
-  // limit area of work for object detection
-  // for (let i = 0; i <= cols; i++) {
-  //   const x = i * cellWidth;
-  //   ctx.beginPath();
-  //   ctx.moveTo(x, headerHeight);
-  //   ctx.lineTo(x, canvas.height);
-  //   ctx.stroke();
-  // }
+      // limit area of work for object detection
+      // for (let i = 0; i <= cols; i++) {
+      //   const x = i * cellWidth;
+      //   ctx.beginPath();
+      //   ctx.moveTo(x, headerHeight);
+      //   ctx.lineTo(x, canvas.height);
+      //   ctx.stroke();
+      // }
 
-  // for (let j = 0; j <= rows; j++) {
-  //   const y = headerHeight + j * cellHeight;
-  //   ctx.beginPath();
-  //   ctx.moveTo(0, y);
-  //   ctx.lineTo(canvas.width, y);
-  //   ctx.stroke();
-  // }
+      // for (let j = 0; j <= rows; j++) {
+      //   const y = headerHeight + j * cellHeight;
+      //   ctx.beginPath();
+      //   ctx.moveTo(0, y);
+      //   ctx.lineTo(canvas.width, y);
+      //   ctx.stroke();
+      // }
 
-  // paint area of work with a light color
-  const startCol = 1;
-  const endCol = 3;
-  const startRow = 1;
-  const endRow = 3;
+      // paint area of work with a light color
+      const startCol = 1;
+      const endCol = 3;
+      const startRow = 1;
+      const endRow = 3;
 
-  ctx.fillStyle = 'rgba(245, 245, 220, 0.5)'; // transparent light beige
-  for (let r = startRow; r <= endRow; r++) {
-    for (let c = startCol; c <= endCol; c++) {
-      const x = c * cellWidth;
-      const y = headerHeight + r * cellHeight;
+      ctx.fillStyle = 'rgba(245, 245, 220, 0.5)'; // transparent light beige
+      for (let r = startRow; r <= endRow; r++) {
+        for (let c = startCol; c <= endCol; c++) {
+          const x = c * cellWidth;
+          const y = headerHeight + r * cellHeight;
+          ctx.fillRect(x, y, cellWidth, cellHeight);
+        }
+      }
+
+      // draw limits of the area of work with a thick line
+      ctx.strokeStyle = 'rgba(150, 100, 50, 0.8)'; // brown color
+      ctx.lineWidth = 3;
+
+      // draw vertical internal lines rectangle 3x3 - area of work
+      // for (let i = startCol; i <= endCol + 1; i++) {
+      //   const x = i * cellWidth;
+      //   const y1 = headerHeight + startRow * cellHeight;
+      //   const y2 = headerHeight + (endRow + 1) * cellHeight;
+      //   ctx.beginPath();
+      //   ctx.moveTo(x, y1);
+      //   ctx.lineTo(x, y2);
+      //   ctx.stroke();
+      // }
+
+      // // draw horizontal internal lines rectangle 3x3 - area of work
+      // for (let j = startRow; j <= endRow + 1; j++) {
+      //   const y = headerHeight + j * cellHeight;
+      //   const x1 = startCol * cellWidth;
+      //   const x2 = (endCol + 1) * cellWidth;
+      //   ctx.beginPath();
+      //   ctx.moveTo(x1, y);
+      //   ctx.lineTo(x2, y);
+      //   ctx.stroke();
+      // }
+
+      // draw only the brown outline of the 3x3 area (no internal lines)
+      const x1 = startCol * cellWidth;
+      const y1 = headerHeight + startRow * cellHeight;
+      const x2 = (endCol + 1) * cellWidth;
+      const y2 = headerHeight + (endRow + 1) * cellHeight;
+
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y1);
+      ctx.lineTo(x2, y2);
+      ctx.lineTo(x1, y2);
+      ctx.closePath();
+      ctx.stroke();
+
+      // internal grid lines
+      // for (let i = 0; i <= cols; i++) {
+      //   const x = i * cellWidth;
+      //   ctx.beginPath();
+      //   ctx.moveTo(x, headerHeight);
+      //   ctx.lineTo(x, canvas.height);
+      //   ctx.stroke();
+      // }
+
+      // for (let j = 0; j <= rows; j++) {
+      //   const y = headerHeight + j * cellHeight;
+      //   ctx.beginPath();
+      //   ctx.moveTo(0, y);
+      //   ctx.lineTo(canvas.width, y);
+      //   ctx.stroke();
+      // }
+
+      // for (let i = 0; i <= cols; i++) {
+      //   for (let j = 0; j <= rows; j++) {
+      //     const x = i * cellWidth;
+      //     const y = headerHeight + j * cellHeight;
+      //     const camX = (i / cols) * 2 - 1;
+      //     const camY = 1 - (j / rows) * 2;
+
+      //     ctx.beginPath();
+      //     ctx.arc(x, y, 3, 0, 2 * Math.PI);
+      //     ctx.fill();
+      //     ctx.fillText(`(${camX.toFixed(2)}, ${camY.toFixed(2)})`, x + 5, y - 5);
+      //   }
+      // }
+    }
+
+    function highlightCell(row, col, color) {
+      const x = col * cellWidth;
+      const y = headerHeight + row * cellHeight;
+
+      ctx.fillStyle = color;
       ctx.fillRect(x, y, cellWidth, cellHeight);
     }
-  }
 
-  // draw limits of the area of work with a thick line
-  ctx.strokeStyle = 'rgba(150, 100, 50, 0.8)'; // brown color
-  ctx.lineWidth = 3;
+    function updateGrid(cells) {
+      draw();
+      for (const cell of cells) {
+        if (cell.action === 'highlight') {
+          highlightCell(cell.row, cell.col, cell.color);
+        } else if (cell.action === 'clear') {
+          ctx.clearRect(cell.col * cellWidth, headerHeight + cell.row * cellHeight, cellWidth, cellHeight);
+        }
+        highlightCell(cell.row, cell.col, cell.color);
+      }
 
-  // draw vertical internal lines rectangle 3x3 - area of work
-  // for (let i = startCol; i <= endCol + 1; i++) {
-  //   const x = i * cellWidth;
-  //   const y1 = headerHeight + startRow * cellHeight;
-  //   const y2 = headerHeight + (endRow + 1) * cellHeight;
-  //   ctx.beginPath();
-  //   ctx.moveTo(x, y1);
-  //   ctx.lineTo(x, y2);
-  //   ctx.stroke();
-  // }
-  
-  // // draw horizontal internal lines rectangle 3x3 - area of work
-  // for (let j = startRow; j <= endRow + 1; j++) {
-  //   const y = headerHeight + j * cellHeight;
-  //   const x1 = startCol * cellWidth;
-  //   const x2 = (endCol + 1) * cellWidth;
-  //   ctx.beginPath();
-  //   ctx.moveTo(x1, y);
-  //   ctx.lineTo(x2, y);
-  //   ctx.stroke();
-  // }
-
-  // draw only the brown outline of the 3x3 area (no internal lines)
-  const x1 = startCol * cellWidth;
-  const y1 = headerHeight + startRow * cellHeight;
-  const x2 = (endCol + 1) * cellWidth;
-  const y2 = headerHeight + (endRow + 1) * cellHeight;
-
-  ctx.beginPath();
-  ctx.moveTo(x1, y1);
-  ctx.lineTo(x2, y1);
-  ctx.lineTo(x2, y2);
-  ctx.lineTo(x1, y2);
-  ctx.closePath();
-  ctx.stroke();
-
-  // internal grid lines
-  // for (let i = 0; i <= cols; i++) {
-  //   const x = i * cellWidth;
-  //   ctx.beginPath();
-  //   ctx.moveTo(x, headerHeight);
-  //   ctx.lineTo(x, canvas.height);
-  //   ctx.stroke();
-  // }
-
-  // for (let j = 0; j <= rows; j++) {
-  //   const y = headerHeight + j * cellHeight;
-  //   ctx.beginPath();
-  //   ctx.moveTo(0, y);
-  //   ctx.lineTo(canvas.width, y);
-  //   ctx.stroke();
-  // }
-
-  // for (let i = 0; i <= cols; i++) {
-  //   for (let j = 0; j <= rows; j++) {
-  //     const x = i * cellWidth;
-  //     const y = headerHeight + j * cellHeight;
-  //     const camX = (i / cols) * 2 - 1;
-  //     const camY = 1 - (j / rows) * 2;
-
-  //     ctx.beginPath();
-  //     ctx.arc(x, y, 3, 0, 2 * Math.PI);
-  //     ctx.fill();
-  //     ctx.fillText(`(${camX.toFixed(2)}, ${camY.toFixed(2)})`, x + 5, y - 5);
-  //   }
-  // }
-}
-
-function highlightCell(row, col, color) {
-  const x = col * cellWidth;
-  const y = headerHeight + row * cellHeight;
-
-  ctx.fillStyle = color;
-  ctx.fillRect(x, y, cellWidth, cellHeight);
-}
-
-function updateGrid(cells) {
-  draw();
-  for (const cell of cells) {
-    if (cell.action === 'highlight') {
-      highlightCell(cell.row, cell.col, cell.color);
-    } else if (cell.action === 'clear') {
-      ctx.clearRect(cell.col * cellWidth, headerHeight + cell.row * cellHeight, cellWidth, cellHeight);
-    }
-    highlightCell(cell.row, cell.col, cell.color);
-  }
-
-  drawImageInCell(rows - 1, cols - 1);  // bottom-right cell
-}
-
-function drawImageInCell(row, col) {
-  if (!img.complete) return;
-
-  const x = col * cellWidth;
-  const y = headerHeight + row * cellHeight;
-
-  const scaleFactor = 0.5;
-  const imgWidth = cellHeight * scaleFactor;
-  const imgHeight = cellHeight * scaleFactor;
-
-  const drawX = x + (cellWidth - imgWidth) / 2;
-  const drawY = y + (cellHeight - imgHeight) / 2;
-
-  ctx.drawImage(img, drawX, drawY, imgWidth, imgHeight);
-}
-
-function applyGridState() {
-  for (const cell of currentGridState.cells) {
-    highlightCell(cell.row, cell.col, cell.color);
-  }
-  drawImageInCell(rows - 1, cols - 1);
-}
-
-function drawProgressDonut() {
-  const donutRadius = 60;
-  const donutThickness = 15;
-  const centerX = canvas.width - donutRadius - 30;
-  const centerY = headerHeight + donutRadius + 30;
-
-  // fundo do donut (anel completo)
-  ctx.beginPath();
-  ctx.arc(centerX, centerY, donutRadius, 0, 2 * Math.PI);
-  ctx.strokeStyle = 'rgba(245, 245, 220, 1)'; // light beige
-  ctx.lineWidth = donutThickness;
-  ctx.stroke();
-
-  // define cor baseado no progresso
-  let progressColor;
-  if (progress < 0.33) {
-    progressColor = 'rgba(255, 99, 71, 1)';       // vermelho tomate
-  } else if (progress < 0.66) {
-    progressColor = 'rgba(255, 215, 0, 1)';       // amarelo ouro
-  } else if (progress < 0.87) {
-    progressColor = 'rgba(144, 238, 144, 1)';     // verde claro (lightgreen)
-  } else {
-    progressColor = 'rgba(0, 100, 0, 1)';         // verde escuro (darkgreen)
-  }
-
-  // parte preenchida (progresso)
-  const startAngle = -Math.PI / 2;
-  const endAngle = startAngle + progress * 2 * Math.PI;
-
-  ctx.beginPath();
-  ctx.arc(centerX, centerY, donutRadius, startAngle, endAngle);
-  ctx.strokeStyle = progressColor;
-  ctx.lineWidth = donutThickness;
-  ctx.lineCap = 'round';
-  ctx.stroke();
-
-  // texto da porcentagem no centro
-  ctx.font = 'bold 24px sans-serif';
-  ctx.fillStyle = progressColor;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(`${Math.round(progress * 100)}%`, centerX, centerY);
-}
-
-window.addEventListener('resize', resizeCanvas);
-
-const ws = new WebSocket("ws://localhost:8000/ws");
-
-ws.onmessage = (event) => {
-  const data = JSON.parse(event.data);
-  // console.log("State update:", data);
-  console.log("State update:", data);
-  console.log("Previous grid state:", currentGridState);
-
-  // update task and subtask text
-  if (data.task && data.subtask) {
-    taskText = data.task || "";
-    subtaskText = data.subtask || "";
-  }
-
-  if (data.progress !== undefined) {
-    // transforma string em número
-    let progNum = Number(data.progress);
-    if (!isNaN(progNum)) {
-      // converte porcentagem para valor entre 0 e 1
-      progress = Math.min(Math.max(progNum / 100, 0), 1);
-    }
-  }
-
-  const cells = [];
-
-  // if (data.state?.HandGridCell) {
-  //   const cell = data.state.HandGridCell;
-  //   const colLetter = cell[0].toUpperCase();
-  //   const colNumber = parseInt(cell.slice(1)) - 1;
-
-  //   // convert letter for index of column (A=0, B=1, etc.)
-  //   const col = colNumber;
-  //   const row = colLetter.charCodeAt(0) - 65;;
-
-  //   let color = "rgba(255, 0, 0, 0.3)";  // red by default
-  //   if (data.highlight === "green") { // green 
-  //     color = "rgba(0, 255, 0, 0.4)";
-  //   } 
-
-  //   // highlight the cell
-  //   cells.push({ row, col, color, action: "highlight" });
-  // }
-
-  // state "completed", turn on last cell green
-  // if (data.state === "completed") {
-  //   cells.push({
-  //     row: rows - 1,
-  //     col: cols - 1,
-  //     color: "rgba(0, 255, 0, 0.2)",
-  //     action: "highlight"
-  //   });
-  // }
-
-  if (data.action && data.cell) {
-  // example: action = "highlight-red", "highlight-green", "clear"
-    const [action, colorName] = data.action.split('-'); // separa em ['highlight', 'red'] ou ['clear']
-    console.log("Action:", action, ", Color:", colorName);
-
-    // const colLetter = data.cell[0].toUpperCase();
-    // const rowNumber = parseInt(data.cell.slice(1)) - 1;
-    // const row = colLetter.charCodeAt(0) - 65; // A=0, B=1...
-    // const col = rowNumber;
-    const colLetter = data.cell[0].toUpperCase();
-    const rowNumber = parseInt(data.cell.slice(1)) - 1;
-    const col = colLetter.charCodeAt(0) - 65; // column
-    const row = rowNumber;                    // line
-
-    let color = null;
-    if (action === 'highlight') {
-      if (colorName === 'red') color = 'rgba(255, 0, 0, 0.3)';
-      else if (colorName === 'green') color = 'rgba(0, 255, 0, 0.4)';
-      else color = 'rgba(0, 0, 255, 0.4)'; // fallback blue
+      // drawImageInCell(rows - 3, cols - 1);  // bottom-right cell
     }
 
-    if (action === 'highlight' && color) {
-      cells.push({ row, col, color, action: "highlight" });
-    } else if (action === 'clear') {
-      cells.push({ row, col, action: "clear" });
+    function drawImageInCell(row, col) {
+      if (!img.complete) return;
+
+      const x = col * cellWidth;
+      const y = headerHeight + row * cellHeight;
+
+      const scaleFactor = 0.5;
+      const imgWidth = cellHeight * scaleFactor;
+      const imgHeight = cellHeight * scaleFactor;
+
+      const drawX = x + (cellWidth - imgWidth) / 2;
+      const drawY = y + (cellHeight - imgHeight) / 2;
+
+      ctx.drawImage(img, drawX, drawY, imgWidth, imgHeight);
     }
-  }
 
-  currentGridState.cells = cells;
-  console.log("Current grid state:", currentGridState);
-  updateGrid(cells);
-};
+    function applyGridState() {
+      for (const cell of currentGridState.cells) {
+        highlightCell(cell.row, cell.col, cell.color);
+      }
+      drawImageInCell(rows - 3, cols - 1);
+    }
 
-</script>
+    function drawProgressDonut() {
+      const donutRadius = 60;
+      const donutThickness = 15;
+      const centerX = canvas.width - donutRadius - 30;
+      const centerY = headerHeight + donutRadius + 30;
+
+      // fundo do donut (anel completo)
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, donutRadius, 0, 2 * Math.PI);
+      ctx.strokeStyle = 'rgba(245, 245, 220, 1)'; // light beige
+      ctx.lineWidth = donutThickness;
+      ctx.stroke();
+
+      // define cor baseado no progresso
+      let progressColor;
+      if (progress < 0.33) {
+        progressColor = 'rgba(255, 99, 71, 1)';       // vermelho tomate
+      } else if (progress < 0.66) {
+        progressColor = 'rgba(255, 215, 0, 1)';       // amarelo ouro
+      } else if (progress < 0.87) {
+        progressColor = 'rgba(144, 238, 144, 1)';     // verde claro (lightgreen)
+      } else {
+        progressColor = 'rgba(0, 100, 0, 1)';         // verde escuro (darkgreen)
+      }
+
+      // parte preenchida (progresso)
+      const startAngle = -Math.PI / 2;
+      const endAngle = startAngle + progress * 2 * Math.PI;
+
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, donutRadius, startAngle, endAngle);
+      ctx.strokeStyle = progressColor;
+      ctx.lineWidth = donutThickness;
+      ctx.lineCap = 'round';
+      ctx.stroke();
+
+      // texto da porcentagem no centro
+      ctx.font = 'bold 24px sans-serif';
+      ctx.fillStyle = progressColor;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(`${Math.round(progress * 100)}%`, centerX, centerY);
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+
+    const ws = new WebSocket("ws://127.0.0.1:8000/ws");
+
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      // console.log("State update:", data);
+      console.log("State update:", data);
+      console.log("Previous grid state:", currentGridState);
+
+      // update task and subtask text
+      if (data.task && data.subtask) {
+        taskText = data.task || "";
+        subtaskText = data.subtask || "";
+      }
+
+      if (data.progress !== undefined) {
+        // transforma string em número
+        let progNum = Number(data.progress);
+        if (!isNaN(progNum)) {
+          // converte porcentagem para valor entre 0 e 1
+          progress = Math.min(Math.max(progNum / 100, 0), 1);
+        }
+      }
+
+      const cells = [];
+
+      // if (data.state?.HandGridCell) {
+      //   const cell = data.state.HandGridCell;
+      //   const colLetter = cell[0].toUpperCase();
+      //   const colNumber = parseInt(cell.slice(1)) - 1;
+
+      //   // convert letter for index of column (A=0, B=1, etc.)
+      //   const col = colNumber;
+      //   const row = colLetter.charCodeAt(0) - 65;;
+
+      //   let color = "rgba(255, 0, 0, 0.3)";  // red by default
+      //   if (data.highlight === "green") { // green 
+      //     color = "rgba(0, 255, 0, 0.4)";
+      //   } 
+
+      //   // highlight the cell
+      //   cells.push({ row, col, color, action: "highlight" });
+      // }
+      if (data.clean) {
+        for (let i = 0; i < rows; i++) {
+          for (let j = 0; j < cols; j++) {
+            cells.push({ row: i, col: j, action: "clear" });
+          }
+        }
+      }
+
+      if (data.completed) {
+        for (let i = 0; i < rows; i++) {
+          for (let j = 0; j < cols; j++) {
+            cells.push({ row: i, col: j, color: "rgba(0, 255, 0, 0.4)", action: "highlight" });
+          }
+        }
+      }
+
+      if (data.action && data.cell) {
+        // example: action = "highlight-red", "highlight-green", "clear"
+        const [action, colorName] = data.action.split('-'); // separa em ['highlight', 'red'] ou ['clear']
+        console.log("Action:", action, ", Color:", colorName);
+
+        // const colLetter = data.cell[0].toUpperCase();
+        // const rowNumber = parseInt(data.cell.slice(1)) - 1;
+        // const row = colLetter.charCodeAt(0) - 65; // A=0, B=1...
+        // const col = rowNumber;
+        const colLetter = data.cell[0].toUpperCase();
+        const rowNumber = parseInt(data.cell.slice(1)) - 1;
+        const col = colLetter.charCodeAt(0) - 65; // column
+        const row = rowNumber;                    // line
+
+        let color = null;
+        if (action === 'highlight') {
+          if (colorName === 'red') color = 'rgba(255, 0, 0, 0.3)';
+          else if (colorName === 'green') color = 'rgba(0, 255, 0, 0.4)';
+          else color = 'rgba(0, 0, 255, 0.4)'; // fallback blue
+        }
+
+        if (action === 'highlight' && color) {
+          cells.push({ row, col, color, action: "highlight" });
+        } else if (action === 'clear') {
+          cells.push({ row, col, action: "clear" });
+        }
+      }
+
+      currentGridState.cells = cells;
+      console.log("Current grid state:", currentGridState);
+      updateGrid(cells);
+    };
+
+  </script>
 </body>
+
 </html>

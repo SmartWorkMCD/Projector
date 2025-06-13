@@ -15,9 +15,9 @@ latest_state = {}
 # mqtt setup
 MQTT_BROKER = os.getenv("BROKER_IP", "localhost")
 MQTT_PORT = int(os.getenv("BROKER_PORT", 1883))
-MQTT_USER = os.getenv("BROKER_USER", "")
-MQTT_PASSWORD = os.getenv("BROKER_PASSWORD", "")
-MQTT_TOPIC = os.getenv("BROKER_TOPIC", "test")
+MQTT_USER = os.getenv("BROKER_USER", "admin")
+MQTT_PASSWORD = os.getenv("BROKER_PASSWORD", "admin")
+MQTT_TOPIC = os.getenv("BROKER_TOPIC", "projector/control")
 
 # store connected websocket clients
 websocket_clients = set()
@@ -43,6 +43,7 @@ def mqtt_loop():
     if MQTT_USER and MQTT_PASSWORD:
         client.username_pw_set(MQTT_USER, MQTT_PASSWORD)
     client.connect(MQTT_BROKER, MQTT_PORT, 60)
+    client.username_pw_set(username='admin', password='admin')
     client.loop_forever()
 
 # @app.on_event("startup")
