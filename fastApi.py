@@ -1,15 +1,21 @@
 import json
 import time
 import dotenv
-from fastapi import FastAPI, WebSocket
+from fastapi import FastAPI, WebSocket, Request
 from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 import asyncio
 import threading
 import paho.mqtt.client as mqtt
 import os
 dotenv.load_dotenv()
 
+
 app = FastAPI()
+app.mount("/static", StaticFiles(directory="static"), name="static")
+templates = Jinja2Templates(directory="templates")
+
 latest_state = {}
 
 # mqtt setup
@@ -53,9 +59,8 @@ def start_mqtt():
 
 
 @app.get("/")
-def read_root():
-    return {"message": "Factory Interface Running"}
-
+def read_root(request: Request):
+    return templates.TemplateResponse(request=request, name="projectorInterfaceTask.html")
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
